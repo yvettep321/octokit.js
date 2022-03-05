@@ -17,7 +17,7 @@ The `octokit` package integrates the three main Octokit libraries
 - [`Octokit` API Client](#octokit-api-client)
   - [Constructor options](#constructor-options)
   - [Authentication](#authentication)
-  - [Proxy Servers](#proxy-servers-nodejs-only)
+  - [Proxy Servers (Node.js only)](#proxy-servers-nodejs-only)
   - [REST API](#rest-api)
     - [`octokit.rest` endpoint methods](#octokitrest-endpoint-methods)
     - [`octokit.request()`](#octokitrequest)
@@ -68,7 +68,7 @@ Deno
 Load <code>octokit</code> directly from <a href="https://cdn.skypack.dev">cdn.skypack.dev</a>
         
 ```ts
-import { Octokit, App } from "https://cdn.skypack.dev/octokit?dts";
+import { Octokit, App, Action } from "https://cdn.skypack.dev/octokit?dts";
 ```
 
 </td></tr>
@@ -79,7 +79,7 @@ Node 12+
 Install with <code>npm install octokit</code>, or <code>yarn add octokit</code>
 
 ```js
-import { Octokit, App } from "octokit";
+import { Octokit, App, Action } from "octokit";
 ```
 
 </td></tr>
@@ -90,7 +90,7 @@ Node 10 and below
 Install with <code>npm install octokit</code>, or <code>yarn add octokit</code>
 
 ```js
-const { Octokit, App } = require("octokit");
+const { Octokit, App, Action } = require("octokit");
 ```
 
 </td></tr>
@@ -361,7 +361,7 @@ await octokit.rest.issues.create({
 
 Learn more about [how authentication strategies work](https://github.com/octokit/authentication-strategies.js/#how-authentication-strategies-work) or how to [create your own](https://github.com/octokit/authentication-strategies.js/#create-your-own-octokit-authentication-strategy-module).
 
-### Proxy Servers (Node.js only)
+### Proxy Servers (Node.js only)
 
 By default, the `Octokit` API client does not make use of the standard proxy server environment variables. To add support for proxy servers you will need to provide an https client that supports them such as [proxy-agent](https://www.npmjs.com/package/proxy-agent).
 
@@ -389,7 +389,7 @@ octokit.rest.repos.get({
 
 ### REST API
 
-There are two ways of using the GitHub REST API, the [`octokit.rest.*` endpoint methods](#octokitrest-endpoint-methods) and [`octokit.request`](#octokitrequest). Both act the same way, the `octokit.rest.*` methods are just added for convenience, they use `octokit.request` internally.
+There are two ways of using the GitHub REST API, the [`octokit.rest.*` endpoint methods](#endpoint-methods) and [`octokit.request`](#arbitrary-requests). Both act the same way, the `octokit.rest.*` methods are just added for convenience, they use `octokit.request` internally.
 
 For example
 
@@ -712,7 +712,7 @@ app.oauth.on("token.created", async ({ token, octokit }) => {
 require("http").createServer(createNodeMiddleware(app)).listen(3000);
 ```
 
-For serverless environments, you can explicitly exchange the `code` from the OAuth web flow redirect for an access token.
+For serverless environments, you can explicitly exchange the `code` from the OAuth web flow redircet for an access token.
 `app.oauth.createToken()` returns an authentication object and emits the "token.created" event.
 
 ```js
@@ -804,7 +804,7 @@ expressApp.listen(3000, () => {
 
 ### OAuth for browser apps
 
-You must not expose your app's client secret to the user, so you cannot use the `App` constructor. Instead, you have to create a server using the `App` constructor which exposes the `/api/github/oauth/*` routes, through which you can safely implement an OAuth login for apps running in a web browser.
+You must not expose your app's client secret to the user, so you cannot use the `App` constructor. Instead, you have to a server using the `App` constructor which exposes the `/api/github/oauth/*` routes, through which you can safely implement an OAuth login for apps running in a web browser.
 
 If you set `(User) Authorization callback URL` to your own app, than you need to read out the `?code=...&state=...` query parameters, compare the `state` parameter to the value returned by `app.oauthLoginUrl()` earlier to protect against forgery attacks, then exchange the `code` for an OAuth Authorization token.
 
