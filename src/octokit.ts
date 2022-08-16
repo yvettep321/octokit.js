@@ -2,20 +2,20 @@ import { Octokit as OctokitCore } from "@octokit/core";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { restEndpointMethods } from "@octokit/plugin-rest-endpoint-methods";
 import { retry } from "@octokit/plugin-retry";
-// import { throttling } from "@octokit/plugin-throttling";
+import { throttling } from "@octokit/plugin-throttling";
 
 import { VERSION } from "./version";
 
 export const Octokit = OctokitCore.plugin(
   restEndpointMethods,
   paginateRest,
-  retry
-  // throttling
+  retry,
+  throttling
 ).defaults({
-  userAgent: `octokit-rest.js/${VERSION}`,
+  userAgent: `octokit.js/${VERSION}`,
   throttle: {
     onRateLimit,
-    onAbuseLimit,
+    onSecondaryRateLimit,
   },
 });
 
@@ -33,9 +33,9 @@ function onRateLimit(retryAfter: number, options: any, octokit: any) {
 }
 
 // istanbul ignore next no need to test internals of the throttle plugin
-function onAbuseLimit(retryAfter: number, options: any, octokit: any) {
+function onSecondaryRateLimit(retryAfter: number, options: any, octokit: any) {
   octokit.log.warn(
-    `Abuse detected for request ${options.method} ${options.url}`
+    `SecondaryRateLimit detected for request ${options.method} ${options.url}`
   );
 
   if (options.request.retryCount === 0) {

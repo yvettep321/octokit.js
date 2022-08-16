@@ -275,7 +275,7 @@ The time zone header will determine the timezone used for generating the timesta
 
 `Octokit` implements request throttling using [`@octokit/plugin-throttling`](https://github.com/octokit/plugin-throttling.js/#readme)
 
-By default, requests are retried once and warnings are logged in case hitting a rate or abuse limit
+By default, requests are retried once and warnings are logged in case of hitting a rate or secondary rate limit
 
 ```js
 {
@@ -290,9 +290,9 @@ By default, requests are retried once and warnings are logged in case hitting a 
       return true;
     }
   },
-  onAbuseLimit: (retryAfter, options, octokit) => {
+  onSecondaryRateLimit: (retryAfter, options, octokit) => {
     octokit.log.warn(
-      `Abuse detected for request ${options.method} ${options.url}`
+      `SecondaryRateLimit detected for request ${options.method} ${options.url}`
     );
 
     if (options.request.retryCount === 0) {
@@ -351,7 +351,7 @@ For example, to implement the above using `App`
 ```js
 const app = new App({ appId, privateKey });
 const { data: slug } = await app.octokit.rest.apps.getAuthenticated();
-const { octokit } = await app.getInstallationOctokit(123);
+const octokit = await app.getInstallationOctokit(123);
 await octokit.rest.issues.create({
   owner: "octocat",
   repo: "hello-world",
@@ -377,7 +377,7 @@ const octokit = new Octokit({
 });
 ```
 
-If you are writing a module that uses `Octokit` and is designed to be used by other people, you should ensure that consumers can provide an alternative agent for your `Octokit` or as a paramater to specific calls such as:
+If you are writing a module that uses `Octokit` and is designed to be used by other people, you should ensure that consumers can provide an alternative agent for your `Octokit` or as a parameter to specific calls such as:
 
 ```js
 octokit.rest.repos.get({
@@ -460,7 +460,7 @@ The 1st argument is the REST API route as listed in GitHub's API documentation. 
 
 #### Pagination
 
-All REST API endpoints that paginate return the first 30 items by default. If you want to retrieve all items, you an use the pagination API. The pagination API expects the REST API route as first argument, but you can also pass any of the `octokit.rest.*.list*` methods for convenience and better code readability.
+All REST API endpoints that paginate return the first 30 items by default. If you want to retrieve all items, you can use the pagination API. The pagination API expects the REST API route as first argument, but you can also pass any of the `octokit.rest.*.list*` methods for convenience and better code readability.
 
 Example: iterate through all issues in a repository
 
@@ -491,6 +491,8 @@ const issues = await octokit.paginate(octokit.rest.issues.listForRepo, {
 
 #### Media Type previews and formats
 
+**Note**: The concept of _preview headers_ has been deprecated from REST API endpoints hosted via `api.github.com` but it still exists in GHES (GitHub Enterprise Server) version 3.2 and below. Instead of using _preview headers_ going forward, new features are now being tested using beta previews that users will have to opt-in to.
+
 Media type previews and formats can be set using `mediaType: { format, previews }` on every request. Required API previews are set automatically on the respective REST API endpoint methods.
 
 Example: retrieve the raw content of a `package.json` file
@@ -520,7 +522,7 @@ const { data } = octokit.rest.repos.getContent({
 console.log("topics on octocat/hello-world: %j", data.topics);
 ```
 
-Learn more about [Media type formats](https://docs.github.com/en/rest/overview/media-types) and [API previews](https://docs.github.com/en/rest/overview/api-previews).
+Learn more about [Media type formats](https://docs.github.com/en/rest/overview/media-types) and [previews](https://docs.github.com/en/enterprise-server@3.2/rest/overview/api-previews) used on GitHub Enterprise Server.
 
 ### GraphQL API queries
 
@@ -640,7 +642,7 @@ Webhook event requests are signed using the webhook secret, which is also part o
 
 The `app.webhooks.*` APIs provide methods to receiving, verifying, and handling webhook events.
 
-Exmaple: create a comment on new issues
+Example: create a comment on new issues
 
 ```js
 import { App, createNodeMiddleware } from "octokit";
